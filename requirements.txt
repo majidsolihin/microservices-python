@@ -1,0 +1,10 @@
+Flask==2.2.5
+flask-cors==3.0.10
+pandas==1.5.3
+joblib==1.3.2
+scikit-learn==1.2.2
+numpy==1.23.5
+psycopg2-binary
+python-dotenv
+paho-mqtt
+tensorflow

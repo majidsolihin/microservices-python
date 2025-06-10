@@ -301,6 +301,7 @@ def get_history():
     limit = int(request.args.get('limit',100))
     return jsonify(fetch_prediction_history(limit))
 
-if __name__=='__main__':
-    print("Flask running on 0.0.0.0:5001")
-    app.run(host='0.0.0.0', port=5001)
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5001))
+    print(f"Flask running on 0.0.0.0:{port}")
+    app.run(host='0.0.0.0', port=port)

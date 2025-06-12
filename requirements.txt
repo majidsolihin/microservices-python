@@ -9,4 +9,3 @@ joblib==1.5.1
 tensorflow==2.19.0
 scikit-learn==1.4.2
 schedule==1.2.1
-logging==0.5.1.2

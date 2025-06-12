@@ -1,5 +1,5 @@
+from flask import Flask, jsonify
 import os
-import time
 import pandas as pd
 import numpy as np
 import joblib
@@ -8,8 +8,13 @@ import psycopg2
 from psycopg2.extras import execute_values
 from tensorflow.keras.models import load_model
 import schedule
+import time
+import threading
 
-# Load model and scaler from the environment paths
+# Initialize Flask app
+app = Flask(__name__)
+
+# Load model and scaler from environment paths
 MODEL_PATH = os.getenv('MODEL_PATH', 'my_model.h5')
 SCALER_PATH = os.getenv('SCALER_PATH', 'scaler.save')
 model = load_model(MODEL_PATH, compile=False)
@@ -60,14 +65,13 @@ def fetch_data_for_prediction(n_past=1440):
     df = df.sort_values('timestamp').ffill().bfill()
     return df
 
-# Prediction function
+# Function to make predictions and insert them into the database
 def predict_and_insert():
     df_hist = fetch_data_for_prediction(n_past=1440)
     
     # Check if enough data is available
     if len(df_hist) < 1440:
-        print("Not enough data for prediction.")
-        return
+        return {"error": "Not enough data for prediction."}
 
     # Scaling the data for prediction
     feature_cols = ['co2', 'temperature', 'humidity', 'rainfall', 'pyrano']
@@ -97,12 +101,23 @@ def predict_and_insert():
     finally:
         conn.close()
 
-    print(f"Prediction inserted for timestamp {timestamp}: CO2 = {predicted_co2} ppm")
+    return {"timestamp": timestamp, "predicted_co2": predicted_co2}
 
-# Schedule to run every 60 minutes
-schedule.every(60).minutes.do(predict_and_insert)
+# Schedule the prediction to run every 60 minutes
+def schedule_predictions():
+    schedule.every(60).minutes.do(predict_and_insert)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
-# Keep running the schedule
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+# Start the prediction scheduling in a separate thread
+threading.Thread(target=schedule_predictions, daemon=True).start()
+
+# API endpoint to get predictions
+@app.route('/api/predict', methods=['GET'])
+def predict():
+    result = predict_and_insert()
+    return jsonify(result)
+
+if __name__ == '__main__':
+    app.run(debug=True, host="0.0.0.0", port=5001)

@@ -1,5 +1,5 @@
-# Gunakan Python 3.11 dengan versi slim untuk mengurangi ukuran image
-FROM python:3.11-slim
+# Gunakan image Python 3.12 slim untuk mengurangi ukuran image
+FROM python:3.12-slim
 
 # Set working directory
 WORKDIR /app
@@ -16,18 +16,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN python -m venv venv
 ENV PATH="/app/venv/bin:$PATH"
 
-# Copy dan install dependencies
+# Salin file requirements.txt ke dalam container
 COPY requirements.txt .
+
+# Install dependensi Python
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy seluruh kode aplikasi
+# Salin seluruh kode aplikasi ke dalam container
 COPY . .
 
 # Pastikan aplikasi berjalan dengan user non-root untuk keamanan
 RUN adduser --disabled-password --gecos "" appuser
 USER appuser
 
-# Expose port aplikasi
+# Expose port yang digunakan oleh aplikasi
 EXPOSE 5001
 
 # Jalankan aplikasi

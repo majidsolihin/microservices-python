@@ -3,8 +3,8 @@ tensorflow==2.16.1
 joblib==1.2.0
 psycopg2-binary==2.9.3
 schedule==1.2.2
-pandas==1.5.0
-numpy==1.23.0
+pandas==2.1.4
+numpy==1.26.4
 python-dotenv==1.1.0
 pytz==2025.2
-setuptools==68.2.0
+setuptools==70.0.0
